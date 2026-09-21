@@ -14,7 +14,7 @@
     <artifactId>salusLaboris</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Salus Laboris API</name>
-    <description>Sistema web de salud ocupacional - configuración inicial del Sprint 1</description>
+    <description>Sistema web de salud ocupacional </description>
 
     <properties>
         <java.version>17</java.version>
