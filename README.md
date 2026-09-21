@@ -1,45 +1,36 @@
 # Salus Laboris API
 
-Backend del Sistema Web de Salud Ocupacional, proyecto universitario.
+Backend del Sistema Web de Salud Ocupacional para el Sprint 1: seguridad y gestión administrativa.
 
-## Estado de esta entrega
+## Incluido
 
-Primer paso del Sprint 1: configuración de Spring Boot 3.5.16, Java 17,
-MySQL y dependencias JJWT 0.11.5. Incluye un perfil de pruebas H2
-y compilación automática en GitHub Actions.
+- Spring Boot 3.5.16 y Java 17.
+- Entidades JPA para `persona`, `rol`, `pagina`, `usuario` y `acceso`.
+- Repositorios Spring Data JPA.
+- DTO y validación de entradas; las respuestas nunca exponen `password_hash`.
+- Contraseñas protegidas con BCrypt.
+- Inicio de sesión JWT HS256 stateless.
+- Permisos vigentes por rol y página, consultados en cada petición.
+- CRUD administrativo de personas, usuarios, roles y páginas.
+- Asignación de páginas a roles.
+- Desactivación lógica mediante `estado`.
+- Pruebas de integración con H2 y validación del esquema con MySQL 8 en GitHub Actions.
 
-Todavía faltan las entidades de las cinco tablas, repositorios, DTO, servicios,
-controladores, el filtro JWT y la configuración de seguridad stateless.
-Las propiedades `app.jwt.*` quedan preparadas para el futuro `JwtService`;
-no crean tokens ni habilitan un endpoint de login. Spring Security conserva
-su configuración predeterminada por ahora. Angular aún no está incluido.
+El frontend Angular todavía no está incluido.
 
-La clase principal conserva su ubicación actual. Al crear las capas, habrá
-que trasladarla y trasladar su prueba a `com.saluslaboris.api` para que
-Spring descubra los componentes del paquete solicitado.
+## Configuración en STS
 
-## Abrir en Eclipse / STS
+Abre **Run → Run Configurations → Spring Boot App → Environment** y agrega:
 
-1. Seleccionar **File → Import → Maven → Existing Maven Projects**.
-2. Elegir la carpeta que contiene `pom.xml`.
-3. Configurar el proyecto con JDK 17.
-4. Pulsar con el botón derecho sobre el proyecto: **Maven → Update Project**.
-5. En **Run → Run Configurations → Spring Boot App → Environment**,
-   agregar las variables de la siguiente tabla.
-6. Ejecutar `SalusLaborisApplication` como **Spring Boot App**.
-
-| Variable | Valor |
+| Variable | Ejemplo o propósito |
 |---|---|
-| `DB_URL` | URL JDBC de tu base existente; por defecto `jdbc:mysql://localhost:3306/salus_laboris`. |
-| `DB_USERNAME` | Tu usuario de MySQL. |
-| `DB_PASSWORD` | La contraseña de ese usuario. |
-| `JWT_SECRET_BASE64` | Clave aleatoria de al menos 32 bytes, codificada en Base64. |
+| `DB_URL` | `jdbc:mysql://localhost:3306/salus_laboris` |
+| `DB_USERNAME` | Usuario de MySQL |
+| `DB_PASSWORD` | Contraseña de MySQL |
+| `JWT_SECRET_BASE64` | Secreto aleatorio de 32 bytes o más, codificado en Base64 |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:4200` |
 
-El nombre real de tu base puede ser diferente de `salus_laboris`.
-No incluyas comillas alrededor de los valores en la ventana Environment.
-Spring Boot no carga archivos `.env` automáticamente.
-
-Para generar la clave en tu computadora, ejecuta `jshell` con el JDK 17 y pega:
+Genera el secreto una sola vez en `jshell`:
 
 ```java
 byte[] clave = new byte[32];
@@ -47,45 +38,83 @@ new java.security.SecureRandom().nextBytes(clave);
 System.out.println(java.util.Base64.getEncoder().encodeToString(clave));
 ```
 
-Guarda el resultado en `JWT_SECRET_BASE64`; no lo subas al repositorio.
-Sal de JShell con `/exit`.
+El repositorio no contiene contraseñas reales. Spring Boot tampoco carga `.env` automáticamente.
 
-## MySQL y esquema existente
+## Base de datos
 
-Usar MySQL 8 y las tablas ya creadas del proyecto.
-`spring.jpa.hibernate.ddl-auto=validate` permite comprobar los mapeos cuando
-se agreguen las entidades, sin crear ni modificar tablas.
-`spring.sql.init.mode=never` desactiva la ejecución automática de
-`schema.sql` y `data.sql`. No se incluyen credenciales reales.
+La aplicación usa `spring.jpa.hibernate.ddl-auto=validate`: verifica las cinco tablas existentes, pero no las modifica. Si vas a trabajar con una base totalmente nueva, puedes ejecutar manualmente [database/schema.sql](database/schema.sql) una sola vez.
 
-## Compilar y ejecutar pruebas
+### Primer administrador
 
-Desde PowerShell, en la raíz del proyecto:
+Si `usuario` está vacía, puedes pedir que la aplicación cree el primer administrador. Agrega temporalmente estas variables en STS:
+
+| Variable | Valor requerido |
+|---|---|
+| `BOOTSTRAP_ENABLED` | `true` |
+| `ADMIN_USERNAME` | Usuario de 3 a 50 caracteres |
+| `ADMIN_PASSWORD` | Contraseña de al menos 12 caracteres y hasta 72 bytes |
+| `ADMIN_TIPO_DOCUMENTO` | Por ejemplo `DNI` |
+| `ADMIN_DOCUMENTO` | Documento único |
+| `ADMIN_NOMBRES` | Nombres |
+| `ADMIN_APELLIDO` | Apellido paterno |
+| `ADMIN_FECHA_NACIMIENTO` | Fecha `AAAA-MM-DD` pasada |
+
+Al iniciar, se crean el rol `ADMINISTRADOR`, las cinco páginas administrativas, sus accesos y el usuario. Después de un arranque correcto, cambia `BOOTSTRAP_ENABLED` a `false`. Si ya existe cualquier usuario, el proceso no cambia datos ni contraseñas.
+
+## Endpoints principales
+
+| Método | Ruta | Función |
+|---|---|---|
+| `POST` | `/api/v1/auth/login` | Iniciar sesión |
+| `GET` | `/api/v1/auth/me` | Consultar perfil y páginas permitidas |
+| `GET/POST` | `/api/v1/personas` | Listar o registrar personas |
+| `GET/PUT` | `/api/v1/personas/{id}` | Consultar o actualizar una persona |
+| `PATCH` | `/api/v1/personas/{id}/estado` | Activar o desactivar una persona |
+| `GET/POST` | `/api/v1/usuarios` | Listar o registrar usuarios |
+| `GET/PUT` | `/api/v1/usuarios/{id}` | Consultar o actualizar un usuario |
+| `PATCH` | `/api/v1/usuarios/{id}/estado` | Activar o desactivar un usuario |
+| `PUT` | `/api/v1/usuarios/{id}/password` | Restablecer contraseña |
+| `GET/POST` | `/api/v1/roles` | Listar o registrar roles |
+| `GET/POST` | `/api/v1/paginas` | Listar o registrar páginas |
+| `GET/PUT` | `/api/v1/accesos/roles/{idRol}` | Consultar o reemplazar accesos del rol |
+
+Los listados aceptan `page` desde 0 y `size` de 1 a 100. Todos los endpoints salvo login requieren:
+
+```text
+Authorization: Bearer <token>
+```
+
+Ejemplo de login:
+
+```json
+{
+  "nombreUsuario": "admin",
+  "password": "la contraseña configurada"
+}
+```
+
+Ejemplo de asignación completa de páginas a un rol:
+
+```json
+{
+  "idPaginas": [1, 2, 3]
+}
+```
+
+El `PUT` reemplaza la asignación anterior de forma transaccional.
+
+## Compilar y probar
+
+PowerShell:
 
 ```powershell
 .\mvnw.cmd clean verify
 ```
 
-Desde Git Bash / Linux:
+Git Bash:
 
 ```bash
 bash mvnw clean verify
 ```
 
-Maven Wrapper descarga Maven y las dependencias en la primera ejecución.
-Se requiere acceso a Maven Central. El comando compila, ejecuta la prueba
-existente de arranque del contexto y genera el JAR en `target/`.
-
-La prueba utiliza `@ActiveProfiles("test")` y una base H2 en memoria,
-sin credenciales locales. Esto comprueba el arranque básico de Spring;
-no verifica la conexión con tu MySQL, los mapeos de las cinco tablas
-ni un flujo de autenticación JWT. El perfil de prueba está en
-`src/test/resources` y no se empaqueta en el JAR de la aplicación.
-
-GitHub Actions ejecuta el mismo comando al abrir o actualizar un pull request
-hacia `main` y al subir cambios a `main`. Consultar la pestaña **Actions**
-o los checks del pull request para ver el resultado real.
-
-## Referencia
-
-[Requisitos oficiales de Spring Boot 3.5](https://docs.spring.io/spring-boot/3.5/system-requirements.html).
+Las pruebas locales usan H2. GitHub Actions también levanta MySQL 8, ejecuta el esquema exacto del proyecto, valida los mapeos JPA y prueba autenticación, autorización, CRUD, estados, CORS y tokens inválidos.
