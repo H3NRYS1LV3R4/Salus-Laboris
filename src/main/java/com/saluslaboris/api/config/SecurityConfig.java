@@ -4,6 +4,7 @@ package com.saluslaboris.api.config;
 import com.saluslaboris.api.security.*;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
@@ -33,7 +34,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, JwtService jwt, UsuarioDetailsService users,
-                                   RestSecurityHandler handler, CorsConfigurationSource cors) throws Exception {
+                                   RestSecurityHandler handler,
+                                   @Qualifier("corsConfigurationSource") CorsConfigurationSource cors) throws Exception {
         return http
             // Solo Bearer en Authorization: no se autentica con cookies ni sesión.
             .csrf(c -> c.disable())
