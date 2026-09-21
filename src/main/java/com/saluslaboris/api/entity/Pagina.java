@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -23,8 +21,6 @@ public class Pagina {
     private String ruta;
     @Column(name = "icono", nullable = true, length = 100)
     private String icono;
-    // MySQL BOOLEAN es TINYINT(1), no BIT.
-    @JdbcTypeCode(SqlTypes.TINYINT)
     @Column(name = "estado", nullable = false)
     private boolean estado = true;
 

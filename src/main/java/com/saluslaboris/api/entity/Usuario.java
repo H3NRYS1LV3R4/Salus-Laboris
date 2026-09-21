@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -31,8 +29,6 @@ public class Usuario {
     @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
-    // MySQL BOOLEAN es TINYINT(1), no BIT.
-    @JdbcTypeCode(SqlTypes.TINYINT)
     @Column(name = "estado", nullable = false)
     private boolean estado = true;
 
