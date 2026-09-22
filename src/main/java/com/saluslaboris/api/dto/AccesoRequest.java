@@ -1,10 +1,9 @@
 package com.saluslaboris.api.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import java.util.List;
+import jakarta.validation.constraints.*;
+import java.time.*;
+import java.util.*;
 
 public record AccesoRequest(
-    @NotNull(message = "La lista de páginas no puede ser nula")
-    List<@Positive(message = "Cada identificador de página debe ser un número positivo") Integer> idPaginas
-) {}
+    @NotNull @Size(max = 100) Set<@NotNull @Positive Integer> idPaginas
+) {  }

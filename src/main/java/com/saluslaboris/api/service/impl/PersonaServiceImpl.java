@@ -1,87 +1,63 @@
 package com.saluslaboris.api.service.impl;
 
-import com.saluslaboris.api.dto.PageResponse;
-import com.saluslaboris.api.dto.PersonaRequest;
-import com.saluslaboris.api.dto.PersonaResponse;
-import com.saluslaboris.api.entity.Persona;
+import com.saluslaboris.api.dto.*;
+import com.saluslaboris.api.entity.*;
+import com.saluslaboris.api.repository.*;
+import com.saluslaboris.api.service.*;
 import com.saluslaboris.api.exception.BusinessException;
-import com.saluslaboris.api.repository.PersonaRepository;
-import com.saluslaboris.api.service.PersonaService;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PersonaServiceImpl implements PersonaService {
-
     private final PersonaRepository personas;
-
-    public PersonaServiceImpl(PersonaRepository personas) {
-        this.personas = personas;
+    @Override public PageResponse<PersonaResponse> listar(int page, int size) {
+        return PageResponse.of(personas.findAll(PageRequest.of(page, size, Sort.by("id"))).map(DtoMapper::persona));
     }
-
-    @Override
-    public PageResponse<PersonaResponse> listar(int page, int size) {
-        var consulta = personas.findAll(PageRequest.of(page, size, Sort.by("id")));
-        return PageResponse.of(consulta.map(DtoMapper::persona));
-    }
-
-    @Override
-    public PersonaResponse obtener(Integer id) {
-        return DtoMapper.persona(find(id));
-    }
-
-    @Override
-    @Transactional
+    @Override public PersonaResponse obtener(Integer id) { return DtoMapper.persona(find(id)); }
+    @Override @Transactional
     public PersonaResponse crear(PersonaRequest dto) {
-        if (personas.existsByNroDocumento(dto.nroDocumento())) {
-            throw BusinessException.conflict("Ya existe una persona registrada con ese número de documento");
+        if (personas.existsByNroDocumento(dto.nroDocumento().trim())) {
+            throw BusinessException.conflict("Ya existe una persona con ese documento");
         }
-
         Persona p = new Persona();
-        mapearDatos(p, dto);
-        return DtoMapper.persona(personas.save(p));
+        fill(p, dto);
+        return DtoMapper.persona(personas.saveAndFlush(p));
     }
-
-    @Override
-    @Transactional
+    @Override @Transactional
     public PersonaResponse actualizar(Integer id, PersonaRequest dto) {
         Persona p = find(id);
-        if (personas.existsByNroDocumentoAndIdNot(dto.nroDocumento(), id)) {
-            throw BusinessException.conflict("Ya existe otra persona registrada con ese número de documento");
+        if (personas.existsByNroDocumentoAndIdNot(dto.nroDocumento().trim(), id)) {
+            throw BusinessException.conflict("Ya existe una persona con ese documento");
         }
-
-        mapearDatos(p, dto);
-        return DtoMapper.persona(personas.save(p));
+        fill(p, dto);
+        return DtoMapper.persona(personas.saveAndFlush(p));
     }
-
-    @Override
-    @Transactional
-    public PersonaResponse cambiarEstado(Integer id, boolean estado, Integer actorPersonaId) {
-        if (!estado && id.equals(actorPersonaId)) {
-            throw BusinessException.conflict("No puedes desactivar tu propio registro de persona");
+    @Override @Transactional
+    public PersonaResponse cambiarEstado(Integer id, boolean estado, Integer actorPersona) {
+        if (!estado && id.equals(actorPersona)) {
+            throw BusinessException.conflict("No puedes desactivar tu propia persona");
         }
-
         Persona p = find(id);
         p.setEstado(estado);
-        return DtoMapper.persona(personas.save(p));
+        return DtoMapper.persona(p);
     }
-
     private Persona find(Integer id) {
-        return personas.findById(id)
-            .orElseThrow(() -> BusinessException.missing("Persona"));
+        return personas.findById(id).orElseThrow(() -> BusinessException.missing("Persona"));
     }
-
-    private void mapearDatos(Persona p, PersonaRequest dto) {
-        p.setTipoDocumento(dto.tipoDocumento());
-        p.setNroDocumento(dto.nroDocumento());
-        p.setNombres(dto.nombres());
-        p.setApellidoPaterno(dto.apellidoPaterno());
-        p.setApellidoMaterno(dto.apellidoMaterno());
+    private void fill(Persona p, PersonaRequest dto) {
+        p.setTipoDocumento(dto.tipoDocumento().trim());
+        p.setNroDocumento(dto.nroDocumento().trim());
+        p.setNombres(dto.nombres().trim());
+        p.setApellidoPaterno(dto.apellidoPaterno().trim());
+        p.setApellidoMaterno(clean(dto.apellidoMaterno()));
         p.setFechaNacimiento(dto.fechaNacimiento());
-        p.setCorreo(dto.correo());
-        p.setTelefono(dto.telefono());
+        p.setCorreo(clean(dto.correo()));
+        p.setTelefono(clean(dto.telefono()));
     }
+    private String clean(String s) { return s == null || s.isBlank() ? null : s.trim(); }
 }
