@@ -1,9 +1,8 @@
 package com.saluslaboris.api.dto;
 
-import jakarta.validation.constraints.*;
-import java.time.*;
-import java.util.*;
+import java.util.List;
 
 public record PerfilResponse(
-    UsuarioResponseDto usuario, List<PaginaResponse> paginas
-) {  }
+    UsuarioResponseDto usuario,
+    List<PaginaResponse> paginas
+) {}

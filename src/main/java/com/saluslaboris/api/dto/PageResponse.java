@@ -1,13 +1,26 @@
 package com.saluslaboris.api.dto;
 
-import jakarta.validation.constraints.*;
-import java.time.*;
-import java.util.*;
+import java.util.List;
+import org.springframework.data.domain.Page;
 
 public record PageResponse<T>(
-    List<T> content, int page, int size, long totalElements, int totalPages
+    List<T> content,
+    int page,
+    int size,
+    long totalElements,
+    int totalPages,
+    boolean first,
+    boolean last
 ) {
-    public static <T> PageResponse<T> of(org.springframework.data.domain.Page<T> page) {
-        return new PageResponse<>(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+    public static <T> PageResponse<T> of(Page<T> p) {
+        return new PageResponse<>(
+            p.getContent(),
+            p.getNumber(),
+            p.getSize(),
+            p.getTotalElements(),
+            p.getTotalPages(),
+            p.isFirst(),
+            p.isLast()
+        );
     }
- }
+}

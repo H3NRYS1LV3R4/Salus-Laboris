@@ -1,9 +1,8 @@
 package com.saluslaboris.api.dto;
 
-import jakarta.validation.constraints.*;
-import java.time.*;
-import java.util.*;
+import jakarta.validation.constraints.NotNull;
 
 public record EstadoRequest(
-    @NotNull Boolean estado
-) {  }
+    @NotNull(message = "El estado (true o false) es obligatorio")
+    Boolean estado
+) {}

@@ -1,12 +1,13 @@
 package com.saluslaboris.api.dto;
 
-import jakarta.validation.constraints.*;
-import java.time.*;
-import java.util.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public record LoginRequest(
-    @NotBlank @Size(max = 50) String nombreUsuario,
-    @NotBlank @Size(max = 72) String password
-) {
-    @Override public String toString() { return "LoginRequest[credenciales ocultas]"; }
- }
+    @NotBlank(message = "El nombre de usuario es obligatorio")
+    @Size(min = 3, max = 50, message = "El usuario debe tener entre 3 y 50 caracteres")
+    String nombreUsuario,
+
+    @NotBlank(message = "La contraseña es obligatoria")
+    String password
+) {}

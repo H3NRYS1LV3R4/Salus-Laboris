@@ -1,10 +1,15 @@
 package com.saluslaboris.api.dto;
 
-import jakarta.validation.constraints.*;
-import java.time.*;
-import java.util.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public record RolRequest(
-    @NotBlank @Pattern(regexp = "[A-Z][A-Z0-9_]{1,49}") String nombre,
-    @Size(max = 200) String descripcion
-) {  }
+    @NotBlank(message = "El nombre del rol es obligatorio")
+    @Size(min = 3, max = 50, message = "El nombre del rol debe tener entre 3 y 50 caracteres")
+    @Pattern(regexp = "^[A-Za-z0-9_]+$", message = "El rol solo puede contener letras, números o guiones bajos")
+    String nombre,
+
+    @Size(max = 200, message = "La descripción no puede superar los 200 caracteres")
+    String descripcion
+) {}

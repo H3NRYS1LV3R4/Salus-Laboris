@@ -1,11 +1,13 @@
 package com.saluslaboris.api.dto;
 
-import jakarta.validation.constraints.*;
-import java.time.*;
-import java.util.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public record PasswordRequest(
-    @NotBlank @Size(min = 12, max = 72) String password
-) {
-    @Override public String toString() { return "PasswordRequest[oculta]"; }
- }
+    @NotBlank(message = "La contraseña no puede estar vacía")
+    @Pattern(
+        regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!._-]).{8,64}$",
+        message = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
+    )
+    String password
+) {}
