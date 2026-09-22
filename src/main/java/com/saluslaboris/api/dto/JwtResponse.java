@@ -1,11 +1,10 @@
 package com.saluslaboris.api.dto;
 
-import java.util.List;
+import jakarta.validation.constraints.*;
+import java.time.*;
+import java.util.*;
 
 public record JwtResponse(
-    String token,
-    String tokenType,
-    long expiresInSeconds,
-    UsuarioResponseDto usuario,
+    String accessToken, String tokenType, long expiresIn, UsuarioResponseDto usuario,
     List<PaginaResponse> paginas
-) {}
+) {  }

@@ -1,39 +1,31 @@
 package com.saluslaboris.api.security;
 
+
 import com.saluslaboris.api.entity.Usuario;
-import com.saluslaboris.api.repository.AccesoRepository;
-import com.saluslaboris.api.repository.UsuarioRepository;
+import com.saluslaboris.api.repository.*;
 import java.util.ArrayList;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UsuarioDetailsService implements UserDetailsService {
-
     private final UsuarioRepository usuarios;
     private final AccesoRepository accesos;
-
-    // Constructor explícito en lugar de @RequiredArgsConstructor
-    public UsuarioDetailsService(UsuarioRepository usuarios, AccesoRepository accesos) {
-        this.usuarios = usuarios;
-        this.accesos = accesos;
-    }
 
     @Override
     public UserPrincipal loadUserByUsername(String username) {
         return principal(usuarios.findByNombreUsuario(username)
             .orElseThrow(() -> new UsernameNotFoundException("Credenciales inválidas")));
     }
-
     public UserPrincipal loadById(Integer id) {
         return principal(usuarios.findOneById(id)
             .orElseThrow(() -> new UsernameNotFoundException("Cuenta no disponible")));
     }
-
     private UserPrincipal principal(Usuario u) {
         var authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + u.getRol().getNombre()));
