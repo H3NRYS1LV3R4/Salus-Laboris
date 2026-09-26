@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/paginas")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMINISTRADOR') and hasAuthority('PAGE:/paginas')")
+@PreAuthorize("hasAnyRole('ADMIN', 'ADMINISTRADOR')")
 public class PaginaController {
 
     private final CatalogoService catalogo;
