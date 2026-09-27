@@ -21,28 +21,28 @@ public class UsuarioController {
 
     private final UsuarioService usuarios;
     @GetMapping
-    public PageResponse<UsuarioResponseDto> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
+    public PageResponse<UsuarioDtos.Response> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
                                                   @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         return usuarios.listar(page, size);
     }
     @GetMapping("/{id}")
-    public UsuarioResponseDto obtener(@PathVariable @Positive Integer id) { return usuarios.obtener(id); }
+    public UsuarioDtos.Response obtener(@PathVariable @Positive Integer id) { return usuarios.obtener(id); }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UsuarioResponseDto crear(@Valid @RequestBody UsuarioCreateDto dto) { return usuarios.crear(dto); }
+    public UsuarioDtos.Response crear(@Valid @RequestBody UsuarioDtos.CreateRequest dto) { return usuarios.crear(dto); }
     @PutMapping("/{id}")
-    public UsuarioResponseDto actualizar(@PathVariable @Positive Integer id, @Valid @RequestBody UsuarioUpdateDto dto,
+    public UsuarioDtos.Response actualizar(@PathVariable @Positive Integer id, @Valid @RequestBody UsuarioDtos.UpdateRequest dto,
                                         @AuthenticationPrincipal UserPrincipal actor) {
         return usuarios.actualizar(id, dto, actor.id());
     }
     @PatchMapping("/{id}/estado")
-    public UsuarioResponseDto estado(@PathVariable @Positive Integer id, @Valid @RequestBody EstadoRequest dto,
+    public UsuarioDtos.Response estado(@PathVariable @Positive Integer id, @Valid @RequestBody EstadoRequest dto,
                                     @AuthenticationPrincipal UserPrincipal actor) {
         return usuarios.cambiarEstado(id, dto.estado(), actor.id());
     }
     @PutMapping("/{id}/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void password(@PathVariable @Positive Integer id, @Valid @RequestBody PasswordRequest dto) {
+    public void password(@PathVariable @Positive Integer id, @Valid @RequestBody UsuarioDtos.PasswordRequest dto) {
         usuarios.cambiarPassword(id, dto);
     }
 
