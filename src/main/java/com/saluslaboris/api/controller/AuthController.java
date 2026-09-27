@@ -20,11 +20,11 @@ public class AuthController {
 
     private final AuthService auth;
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AuthDtos.JwtResponse> login(@Valid @RequestBody AuthDtos.LoginRequest request) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(auth.login(request));
     }
     @GetMapping("/me")
-    public PerfilResponse me(@AuthenticationPrincipal UserPrincipal user) {
+    public AuthDtos.PerfilResponse me(@AuthenticationPrincipal UserPrincipal user) {
         return auth.perfil(user.id());
     }
 

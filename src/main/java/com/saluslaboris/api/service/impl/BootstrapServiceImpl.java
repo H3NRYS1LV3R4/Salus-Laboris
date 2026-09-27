@@ -27,7 +27,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     public void initialize(BootstrapProperties p) {
         // Solo inicializa una instalación sin cuentas; nunca restablece una contraseña existente.
         if (usuarios.count() > 0) return;
-        var persona = new PersonaRequest(p.getTipoDocumento(), p.getNroDocumento(), p.getNombres(),
+        var persona = new PersonaDtos.Request(p.getTipoDocumento(), p.getNroDocumento(), p.getNombres(),
             p.getApellidoPaterno(), null, p.getFechaNacimiento(), null, null);
         if (!validator.validate(persona).isEmpty() || p.getUsername() == null
                 || !p.getUsername().matches("[A-Za-z0-9._-]{3,50}")) {
@@ -49,7 +49,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             AccesoId id = new AccesoId(rol.getId(), pagina.getId());
             if (!accesos.existsById(id)) accesos.save(new Acceso(rol, pagina));
         }
-        PersonaResponse guardada = personaService.crear(persona);
-        usuarioService.crear(new UsuarioCreateDto(guardada.id(), rol.getId(), p.getUsername(), p.getPassword()));
+        PersonaDtos.Response guardada = personaService.crear(persona);
+        usuarioService.crear(new UsuarioDtos.CreateRequest(guardada.id(), rol.getId(), p.getUsername(), p.getPassword()));
     }
 }

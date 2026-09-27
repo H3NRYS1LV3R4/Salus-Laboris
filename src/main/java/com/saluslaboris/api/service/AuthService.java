@@ -3,6 +3,6 @@ package com.saluslaboris.api.service;
 import com.saluslaboris.api.dto.*;
 
 public interface AuthService {
-    JwtResponse login(LoginRequest request);
-    PerfilResponse perfil(Integer idUsuario);
+    AuthDtos.JwtResponse login(AuthDtos.LoginRequest request);
+    AuthDtos.PerfilResponse perfil(Integer idUsuario);
 }

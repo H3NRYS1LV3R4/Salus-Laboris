@@ -21,19 +21,19 @@ public class RolController {
 
     private final CatalogoService catalogo;
     @GetMapping
-    public PageResponse<RolResponse> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
+    public PageResponse<RolDto> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
                                           @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         return catalogo.listarRoles(page, size);
     }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RolResponse crear(@Valid @RequestBody RolRequest dto) { return catalogo.crearRol(dto); }
+    public RolDto crear(@Valid @RequestBody RolDto dto) { return catalogo.crearRol(dto); }
     @PutMapping("/{id}")
-    public RolResponse actualizar(@PathVariable @Positive Integer id, @Valid @RequestBody RolRequest dto) {
+    public RolDto actualizar(@PathVariable @Positive Integer id, @Valid @RequestBody RolDto dto) {
         return catalogo.actualizarRol(id, dto);
     }
     @PatchMapping("/{id}/estado")
-    public RolResponse estado(@PathVariable @Positive Integer id, @Valid @RequestBody EstadoRequest dto) {
+    public RolDto estado(@PathVariable @Positive Integer id, @Valid @RequestBody EstadoRequest dto) {
         return catalogo.estadoRol(id, dto.estado());
     }
 

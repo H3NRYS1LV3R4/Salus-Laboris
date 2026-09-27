@@ -22,12 +22,12 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final RolRepository roles;
     private final PasswordEncoder encoder;
 
-    @Override public PageResponse<UsuarioResponseDto> listar(int page, int size) {
+    @Override public PageResponse<UsuarioDtos.Response> listar(int page, int size) {
         return PageResponse.of(usuarios.findAll(PageRequest.of(page, size, Sort.by("id"))).map(DtoMapper::usuario));
     }
-    @Override public UsuarioResponseDto obtener(Integer id) { return DtoMapper.usuario(find(id)); }
+    @Override public UsuarioDtos.Response obtener(Integer id) { return DtoMapper.usuario(find(id)); }
     @Override @Transactional
-    public UsuarioResponseDto crear(UsuarioCreateDto dto) {
+    public UsuarioDtos.Response crear(UsuarioDtos.CreateRequest dto) {
         Passwords.validate(dto.password());
         if (usuarios.existsByNombreUsuario(dto.nombreUsuario())) {
             throw BusinessException.conflict("El nombre de usuario ya está registrado");
@@ -45,7 +45,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return DtoMapper.usuario(usuarios.saveAndFlush(u));
     }
     @Override @Transactional
-    public UsuarioResponseDto actualizar(Integer id, UsuarioUpdateDto dto, Integer actorId) {
+    public UsuarioDtos.Response actualizar(Integer id, UsuarioDtos.UpdateRequest dto, Integer actorId) {
         Usuario u = find(id);
         if (id.equals(actorId) && !u.getRol().getId().equals(dto.idRol())) {
             throw BusinessException.conflict("No puedes cambiar tu propio rol");
@@ -58,14 +58,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         return DtoMapper.usuario(usuarios.saveAndFlush(u));
     }
     @Override @Transactional
-    public UsuarioResponseDto cambiarEstado(Integer id, boolean estado, Integer actorId) {
+    public UsuarioDtos.Response cambiarEstado(Integer id, boolean estado, Integer actorId) {
         if (!estado && id.equals(actorId)) throw BusinessException.conflict("No puedes desactivar tu propia cuenta");
         Usuario u = find(id);
         u.setEstado(estado);
         return DtoMapper.usuario(u);
     }
     @Override @Transactional
-    public void cambiarPassword(Integer id, PasswordRequest dto) {
+    public void cambiarPassword(Integer id, UsuarioDtos.PasswordRequest dto) {
         Passwords.validate(dto.password());
         find(id).setPasswordHash(encoder.encode(dto.password()));
     }
