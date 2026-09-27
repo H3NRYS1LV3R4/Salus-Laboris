@@ -15,12 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class PersonaServiceImpl implements PersonaService {
     private final PersonaRepository personas;
-    @Override public PageResponse<PersonaResponse> listar(int page, int size) {
+    @Override public PageResponse<PersonaDtos.Response> listar(int page, int size) {
         return PageResponse.of(personas.findAll(PageRequest.of(page, size, Sort.by("id"))).map(DtoMapper::persona));
     }
-    @Override public PersonaResponse obtener(Integer id) { return DtoMapper.persona(find(id)); }
+    @Override public PersonaDtos.Response obtener(Integer id) { return DtoMapper.persona(find(id)); }
     @Override @Transactional
-    public PersonaResponse crear(PersonaRequest dto) {
+    public PersonaDtos.Response crear(PersonaDtos.Request dto) {
         if (personas.existsByNroDocumento(dto.nroDocumento().trim())) {
             throw BusinessException.conflict("Ya existe una persona con ese documento");
         }
@@ -29,7 +29,7 @@ public class PersonaServiceImpl implements PersonaService {
         return DtoMapper.persona(personas.saveAndFlush(p));
     }
     @Override @Transactional
-    public PersonaResponse actualizar(Integer id, PersonaRequest dto) {
+    public PersonaDtos.Response actualizar(Integer id, PersonaDtos.Request dto) {
         Persona p = find(id);
         if (personas.existsByNroDocumentoAndIdNot(dto.nroDocumento().trim(), id)) {
             throw BusinessException.conflict("Ya existe una persona con ese documento");
@@ -38,7 +38,7 @@ public class PersonaServiceImpl implements PersonaService {
         return DtoMapper.persona(personas.saveAndFlush(p));
     }
     @Override @Transactional
-    public PersonaResponse cambiarEstado(Integer id, boolean estado, Integer actorPersona) {
+    public PersonaDtos.Response cambiarEstado(Integer id, boolean estado, Integer actorPersona) {
         if (!estado && id.equals(actorPersona)) {
             throw BusinessException.conflict("No puedes desactivar tu propia persona");
         }
@@ -49,7 +49,7 @@ public class PersonaServiceImpl implements PersonaService {
     private Persona find(Integer id) {
         return personas.findById(id).orElseThrow(() -> BusinessException.missing("Persona"));
     }
-    private void fill(Persona p, PersonaRequest dto) {
+    private void fill(Persona p, PersonaDtos.Request dto) {
         p.setTipoDocumento(dto.tipoDocumento().trim());
         p.setNroDocumento(dto.nroDocumento().trim());
         p.setNombres(dto.nombres().trim());
