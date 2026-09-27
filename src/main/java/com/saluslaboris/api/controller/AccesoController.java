@@ -21,11 +21,11 @@ public class AccesoController {
 
     private final CatalogoService catalogo;
     @GetMapping("/roles/{idRol}")
-    public java.util.List<PaginaResponse> obtener(@PathVariable @Positive Integer idRol) {
+    public java.util.List<PaginaDto> obtener(@PathVariable @Positive Integer idRol) {
         return catalogo.obtenerAccesos(idRol);
     }
     @PutMapping("/roles/{idRol}")
-    public java.util.List<PaginaResponse> asignar(@PathVariable @Positive Integer idRol,
+    public java.util.List<PaginaDto> asignar(@PathVariable @Positive Integer idRol,
                                                 @Valid @RequestBody AccesoRequest dto) {
         return catalogo.asignarAccesos(idRol, dto);
     }
