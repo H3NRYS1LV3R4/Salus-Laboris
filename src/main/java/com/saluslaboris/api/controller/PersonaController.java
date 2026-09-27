@@ -21,21 +21,21 @@ public class PersonaController {
 
     private final PersonaService personas;
     @GetMapping
-    public PageResponse<PersonaResponse> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
+    public PageResponse<PersonaDtos.Response> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
                                                @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         return personas.listar(page, size);
     }
     @GetMapping("/{id}")
-    public PersonaResponse obtener(@PathVariable @Positive Integer id) { return personas.obtener(id); }
+    public PersonaDtos.Response obtener(@PathVariable @Positive Integer id) { return personas.obtener(id); }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PersonaResponse crear(@Valid @RequestBody PersonaRequest dto) { return personas.crear(dto); }
+    public PersonaDtos.Response crear(@Valid @RequestBody PersonaDtos.Request dto) { return personas.crear(dto); }
     @PutMapping("/{id}")
-    public PersonaResponse actualizar(@PathVariable @Positive Integer id, @Valid @RequestBody PersonaRequest dto) {
+    public PersonaDtos.Response actualizar(@PathVariable @Positive Integer id, @Valid @RequestBody PersonaDtos.Request dto) {
         return personas.actualizar(id, dto);
     }
     @PatchMapping("/{id}/estado")
-    public PersonaResponse estado(@PathVariable @Positive Integer id, @Valid @RequestBody EstadoRequest dto,
+    public PersonaDtos.Response estado(@PathVariable @Positive Integer id, @Valid @RequestBody EstadoRequest dto,
                                    @AuthenticationPrincipal UserPrincipal actor) {
         return personas.cambiarEstado(id, dto.estado(), actor.idPersona());
     }
